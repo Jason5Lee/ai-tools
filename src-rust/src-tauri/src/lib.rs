@@ -1,4 +1,5 @@
 mod ask;
+mod config;
 
 use ai_tools_common::*;
 use std::path::PathBuf;
@@ -23,47 +24,8 @@ async fn open_app(handle: tauri::AppHandle, name: String) -> Result<(), serde_js
 }
 
 #[tauri::command]
-fn set_window_title(window: tauri::WebviewWindow, title: String) -> Result<(), serde_json::Value> {
+fn set_window_title(window: tauri::WebviewWindow, title: String) -> Result<(), ()> {
     window.set_title(&title).map_err(log_error)
-}
-
-#[derive(Default, serde::Serialize, serde::Deserialize)]
-struct Config {
-    http_proxy: HttpProxyConfig,
-}
-
-#[derive(Default, serde::Serialize, serde::Deserialize)]
-struct HttpProxyConfig {
-    enabled: bool,
-    url: String,
-}
-
-#[tauri::command]
-fn load_config(handle: tauri::AppHandle) -> Result<Config, serde_json::Value> {
-    let mut config_path = handle.path().app_config_dir().map_err(log_error)?;
-    config_path.push("config.json");
-    // Should I use async file IO here?
-    match std::fs::File::open(&config_path) {
-        Ok(file) => serde_json::from_reader(file).map_err(log_error),
-        Err(err) => {
-            if err.kind() == std::io::ErrorKind::NotFound {
-                Ok(Config::default())
-            } else {
-                Err(log_error(err))
-            }
-        }
-    }
-}
-
-#[tauri::command]
-fn save_config(handle: tauri::AppHandle, config: Config) -> Result<(), serde_json::Value> {
-    let mut config_path = handle.path().app_config_dir().map_err(log_error)?;
-    config_path.push("config.json");
-
-    // Should I use async file IO here?
-    let file = std::fs::File::create(&config_path).map_err(log_error)?;
-
-    serde_json::to_writer(file, &config).map_err(log_error)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -78,11 +40,16 @@ pub fn run() {
                 ])
                 .build(),
         )
+        .setup(|app| {
+            app.manage(
+                config::load_config(app.handle())
+                    .map_err(|()| Box::<dyn std::error::Error>::from("Failed to read config"))?,
+            );
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             open_app,
             set_window_title,
-            load_config,
-            save_config,
             ask::ask_get_implementations,
             ask::ask_run_action,
         ])

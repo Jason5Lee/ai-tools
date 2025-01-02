@@ -129,17 +129,22 @@ function App() {
                 })}
             >Generate Search Keyword
             </button>
-            <div className="flex items-center mb-4">
-              <textarea
-                value={search}
-                onChange={(e: React.ChangeEvent<{ value: string }>) => setSearch(e.target.value)}
-                placeholder="Search ..."
-                className="default-textarea"
-                rows={1}
-              />
-              {/*<button className="ml-2 default-button">Search</button>*/}
+            {search && (<div className="p-4 border border-gray-300 rounded-md overflow-auto max-h-96 mb-4">
+              <p className="default-paragraph whitespace-pre-line">
+                {search}
+              </p>
+            </div>)}
+            {/*<div className="flex items-center mb-4">*/}
+            {/*  <textarea*/}
+            {/*    value={search}*/}
+            {/*    onChange={(e: React.ChangeEvent<{ value: string }>) => setSearch(e.target.value)}*/}
+            {/*    placeholder="Search ..."*/}
+            {/*    className="default-textarea"*/}
+            {/*    rows={5}*/}
+            {/*  />*/}
+            {/*  /!*<button className="ml-2 default-button">Search</button>*!/*/}
 
-            </div>
+            {/*</div>*/}
             <textarea
               value={materialText}
               onChange={(e: React.ChangeEvent<{ value: string }>) => setMaterialText(e.target.value)}

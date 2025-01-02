@@ -3,21 +3,8 @@ use std::backtrace::BacktraceStatus;
 use std::fmt::{Display, Formatter};
 pub type Str = smol_str::SmolStr;
 
-pub fn internal_error() -> serde_json::Value {
-    let mut map = serde_json::Map::new();
-    map.insert("ident".into(), "INTERNAL_ERROR".into()).unwrap();
-    serde_json::Value::Object(map)
-}
-
-pub fn log_error<E: Display>(err: E) -> serde_json::Value {
-    let bt = std::backtrace::Backtrace::capture();
-    if bt.status() == BacktraceStatus::Captured {
-        log::error!("{}\n{}", err, bt);
-    } else {
-        log::error!("{}", err);
-    }
-
-    internal_error()
+pub fn log_error<E: Display>(err: E) {
+    log::error!("{err}");
 }
 
 #[derive(serde::Serialize)]

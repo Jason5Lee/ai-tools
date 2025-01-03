@@ -1,9 +1,9 @@
 pub use smol_str;
-use std::backtrace::BacktraceStatus;
 use std::fmt::{Display, Formatter};
 pub type Str = smol_str::SmolStr;
 
 pub fn log_error<E: Display>(err: E) {
+    println!("{err}");
     log::error!("{err}");
 }
 
@@ -13,11 +13,11 @@ pub struct Implementation {
     pub available: Option<bool>,
 }
 
-pub fn unknown_method_error() -> serde_json::Value {
-    let mut map = serde_json::Map::new();
-    map.insert("ident".into(), "UNKNOWN_METHOD".into()).unwrap();
-    serde_json::Value::Object(map)
-}
+// pub fn unknown_method_error() -> serde_json::Value {
+//     let mut map = serde_json::Map::new();
+//     map.insert("ident".into(), "UNKNOWN_METHOD".into()).unwrap();
+//     serde_json::Value::Object(map)
+// }
 //
 // #[cfg(test)]
 // mod tests {

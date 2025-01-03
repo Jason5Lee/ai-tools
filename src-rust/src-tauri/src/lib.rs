@@ -41,15 +41,17 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
-            app.manage(
-                config::load_config(app.handle())
-                    .map_err(|()| Box::<dyn std::error::Error>::from("Failed to read config"))?,
-            );
+            let conf = config::load_config(app.handle())
+                .map_err(|()| Box::<dyn std::error::Error>::from("Failed to read config"))?;
+
+            app.manage(config::ConfigState(std::sync::Mutex::new(std::sync::Arc::new(conf))));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             open_app,
             set_window_title,
+            config::get_config,
+            config::save_config,
             ask::ask_get_implementations,
             ask::ask_run_action,
         ])

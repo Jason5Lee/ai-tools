@@ -6,6 +6,10 @@
     @apply bg-blue-500 text-white dark:bg-blue-700 dark:text-gray-100 px-4 py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-800
 }
 
+.default-disabled-button {
+    @apply bg-blue-300 text-gray-400 dark:bg-blue-500 dark:text-gray-600 px-4 py-2 rounded cursor-not-allowed;
+}
+
 .default-input {
     @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-gray-200 px-3 py-2 rounded focus:outline-none focus:border-blue-500 dark:focus:border-blue-400
 }
@@ -28,6 +32,10 @@
 
 .default-green-button {
     @apply bg-green-500 text-white dark:bg-green-700 dark:text-gray-100 px-4 py-2 rounded hover:bg-green-600 dark:hover:bg-green-800
+}
+
+.default-disabled-green-button {
+    @apply bg-green-500 text-white dark:bg-green-700 dark:text-gray-100 px-4 py-2 rounded opacity-50 cursor-not-allowed;
 }
 
 .default-paragraph {

@@ -1,10 +1,62 @@
+pub mod ask;
+pub mod config;
+pub mod openai_api;
+
+pub use futures_util;
 pub use smol_str;
-use std::fmt::{Display, Formatter};
+pub use tracing;
+
+use crate::config::Config;
+use futures_util::stream::BoxStream;
+use std::fmt::Display;
+use std::sync::{Arc, RwLock};
+
 pub type Str = smol_str::SmolStr;
+
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
+pub struct Manual {
+    prompt: String,
+}
+
+pub enum RunActionOutput {
+    Response(BoxStream<'static, Result<String, ()>>),
+    Manual(Manual)
+}
+pub type RunActionResult = Result<RunActionOutput, ()>;
+
+pub struct AppState {
+    config: RwLock<Arc<Config>>,
+    http_client: reqwest::Client,
+}
+
+impl AppState {
+    pub fn new(config: Config) -> Self {
+        Self {
+            config: RwLock::new(Arc::new(config)),
+            http_client: reqwest::Client::new(),
+        }
+    }
+
+    pub fn set_config(&self, config: Arc<Config>) {
+        *self.config.write().unwrap() = config;
+    }
+
+    pub fn get_config(&self) -> Arc<Config> {
+        self.config.read().unwrap().clone()
+    }
+
+    pub fn http_client(&self) -> &reqwest::Client {
+        &self.http_client
+    }
+}
+
+pub fn prompt_into_manual_result(prompt: String) -> RunActionResult {
+    Ok(RunActionOutput::Manual(Manual { prompt }))
+}
 
 pub fn log_error<E: Display>(err: E) {
     println!("{err}");
-    log::error!("{err}");
+    tracing::error!("{err}");
 }
 
 #[derive(serde::Serialize)]

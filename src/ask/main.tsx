@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { invoke } from "@tauri-apps/api/core";
 import ImplSelect from "../common/ImplSelect.tsx";
@@ -7,15 +7,26 @@ import ErrorMsg from "../common/ErrorMsg.tsx";
 import ManualMode from "../common/ManualMode"
 
 const rewriteImplDisplay: Record<string, string> = {
-  GENERAL_MANUAL: 'Manual - General'
+  GENERAL_MANUAL: 'Manual - General',
+  OPENAI_4o_MINI: 'OpenAI 4o Mini',
+  OPENAI_4o: 'OpenAI 4o',
+  OPENAI_4_TURBO: 'OpenAI GPT-4 Turbo',
 }
 
 const genSearchImplDisplay: Record<string, string> = {
-  GENERAL_MANUAL: 'Manual - General'
+  GENERAL_MANUAL: 'Manual - General',
+  OPENAI_4o: 'OpenAI 4o',
+  OPENAI_4_TURBO: 'OpenAI GPT-4 Turbo',
+  OPENAI_o1_MINI: 'OpenAI o1 Mini',
+  OPENAI_o1_PREVIEW: 'OpenAI o1 Preview',
 }
 
-const answerImplDisplay: Record<string, string> = {
-  GENERAL_MANUAL: 'Manual - General'
+const askImplDisplay: Record<string, string> = {
+  GENERAL_MANUAL: 'Manual - General',
+  OPENAI_4o: 'OpenAI 4o',
+  OPENAI_4_TURBO: 'OpenAI GPT-4 Turbo',
+  OPENAI_o1_MINI: 'OpenAI o1 Mini',
+  OPENAI_o1_PREVIEW: 'OpenAI o1 Preview',
 }
 
 const app = 'ask'
@@ -25,6 +36,8 @@ function App() {
     invoke("set_window_title", { title: "AI Tools - Ask" })
   }, [])
 
+  const manualModeRef = useRef<HTMLDivElement>(null);
+
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [searchSectionOpen, setSearchSectionOpen] = useState(true)
   const [search, setSearch] = useState('')
@@ -32,13 +45,22 @@ function App() {
   const [question, setQuestion] = useState('')
   const [rewrittenQuestion, setRewrittenQuestion] = useState('')
 
+  const [rewriteInProgress, setRewriteInProgress] = useState(false)
   const [allRewriteImpls, setAllRewriteImpls] = useState<Implementation[] | undefined>(undefined)
   const [selectedRewriteImplIdent, setSelectedRewriteImplIdent] = useState<string | undefined>(undefined)
+  const rewriteDisabled = rewriteInProgress || selectedRewriteImplIdent === undefined
+
+  const [genSearchInProgress, setGenSearchInProgress] = useState(false)
   const [allGenSearchImpls, setAllGenSearchImpls] = useState<Implementation[] | undefined>(undefined)
   const [selectedGenSearchImplIdent, setSelectedGenSearchImplIdent] = useState<string | undefined>(undefined)
-  const [allAnswerImpls, setAllAnswerImpls] = useState<Implementation[] | undefined>(undefined)
-  const [selectedAnswerImplIdent, setSelectedAnswerImplIdent] = useState<string | undefined>(undefined)
+  const genSearchDisabled = genSearchInProgress || selectedGenSearchImplIdent === undefined
 
+  const [askInProgress, setAskInProgress] = useState(false)
+  const [allAskImpls, setAllAskImpls] = useState<Implementation[] | undefined>(undefined)
+  const [selectedAskImplIdent, setSelectedAskImplIdent] = useState<string | undefined>(undefined)
+  const askDisabled = askInProgress || selectedAskImplIdent === undefined
+
+  console.log(askInProgress + ', ' + (askInProgress || selectedAskImplIdent === undefined))
   const [manualModeState, setManualModeState] = useState<ManualModeState | null>(null)
   const [answer, setAnswer] = useState('')
 
@@ -53,7 +75,7 @@ function App() {
   useEffect(() => {
     getAllImplementations(app, 'rewrite', setAllRewriteImpls, setErrorMsg)
     getAllImplementations(app, 'genSearch', setAllGenSearchImpls, setErrorMsg)
-    getAllImplementations(app, 'ask', setAllAnswerImpls, setErrorMsg)
+    getAllImplementations(app, 'ask', setAllAskImpls, setErrorMsg)
   }, []);
 
   return (
@@ -67,11 +89,12 @@ function App() {
                     selectedIdent={selectedGenSearchImplIdent} setSelectedIdent={setSelectedGenSearchImplIdent}/>
       </div>
       <div className="flex items-center mb-4">
-        <ImplSelect label="Answer" display={answerImplDisplay} all={allAnswerImpls}
-                    selectedIdent={selectedAnswerImplIdent} setSelectedIdent={setSelectedAnswerImplIdent}/>
+        <ImplSelect label="Answer" display={askImplDisplay} all={allAskImpls}
+                    selectedIdent={selectedAskImplIdent} setSelectedIdent={setSelectedAskImplIdent}/>
       </div>
 
       {/* Manual Mode */}
+      <div ref={manualModeRef}></div>
       <ManualMode state={manualModeState} setState={setManualModeState} setErrorMessage={setErrorMsg}/>
       {/* Question Input */}
       <div className="flex items-center mb-4">
@@ -83,15 +106,20 @@ function App() {
           rows={1}
         />
         <button
-          disabled={selectedRewriteImplIdent === undefined}
-          className="ml-2 default-button"
-          onClick={() => runAction(
-            app, { name: 'rewrite', question },
-            selectedRewriteImplIdent!, 'Rewrite',
-            {
-              setErrorMessage: setErrorMsg, setManualModeState,
-              appendResult: (r) => setRewrittenQuestion(q => q + r)
-            })}
+          disabled={rewriteDisabled}
+          className={rewriteDisabled ? "ml-2 default-disabled-button" : "ml-2 default-button"}
+          onClick={() => {
+            setRewriteInProgress(true)
+            runAction(
+              {
+                app, action: { name: 'rewrite', question },
+                ident: selectedRewriteImplIdent!,
+                actionDisplay: 'Rewrite', manualModeElement: manualModeRef.current,
+                setErrorMessage: setErrorMsg, setManualModeState,
+                setResult: setRewrittenQuestion,
+                onFinish: () => setRewriteInProgress(false)
+              })
+          }}
         >Rewrite
         </button>
       </div>
@@ -119,14 +147,20 @@ function App() {
         {searchSectionOpen && (
           <>
             <button
-              disabled={selectedGenSearchImplIdent === undefined}
-              className="default-button mb-4"
-              onClick={() => runAction(app, { name: 'genSearch', question: getQuestion() },
-                selectedGenSearchImplIdent!, 'Generate Search',
-                {
-                  setErrorMessage: setErrorMsg, setManualModeState,
-                  appendResult: (r) => setSearch(q => q + r)
-                })}
+              disabled={genSearchDisabled}
+              className={genSearchDisabled ? "default-disabled-button mb-4" : "default-button mb-4"}
+              onClick={() => {
+                setGenSearchInProgress(true)
+                runAction(
+                  {
+                    app, action: { name: 'genSearch', question: getQuestion() },
+                    ident: selectedGenSearchImplIdent!,
+                    actionDisplay: 'Generate Search', manualModeElement: manualModeRef.current,
+                    setErrorMessage: setErrorMsg, setManualModeState,
+                    setResult: setSearch,
+                    onFinish: () => setGenSearchInProgress(false),
+                  })
+              }}
             >Generate Search Keyword
             </button>
             {search && (<div className="p-4 border border-gray-300 rounded-md overflow-auto max-h-96 mb-4">
@@ -134,17 +168,7 @@ function App() {
                 {search}
               </p>
             </div>)}
-            {/*<div className="flex items-center mb-4">*/}
-            {/*  <textarea*/}
-            {/*    value={search}*/}
-            {/*    onChange={(e: React.ChangeEvent<{ value: string }>) => setSearch(e.target.value)}*/}
-            {/*    placeholder="Search ..."*/}
-            {/*    className="default-textarea"*/}
-            {/*    rows={5}*/}
-            {/*  />*/}
-            {/*  /!*<button className="ml-2 default-button">Search</button>*!/*/}
 
-            {/*</div>*/}
             <textarea
               value={materialText}
               onChange={(e: React.ChangeEvent<{ value: string }>) => setMaterialText(e.target.value)}
@@ -159,18 +183,24 @@ function App() {
       {/* Answer Button */}
       <div className="mb-4">
         <button
-          disabled={selectedAnswerImplIdent === undefined}
-          className="default-green-button"
-          onClick={() => runAction(app, {
-              name: 'ask',
-              question: getQuestion(),
-              material: materialText === '' ? undefined : materialText
-            },
-            selectedAnswerImplIdent!, 'Ask',
-            {
-              setErrorMessage: setErrorMsg, setManualModeState,
-              appendResult: (r) => setAnswer(q => q + r)
-            })}
+          disabled={askDisabled}
+          className={askDisabled ? "default-disabled-green-button" : "default-green-button"}
+          onClick={() => {
+            setAskInProgress(true)
+            runAction(
+              {
+                app, ident: selectedAskImplIdent!,
+                action: {
+                  name: 'ask',
+                  question: getQuestion(),
+                  material: materialText === '' ? undefined : materialText
+                },
+                actionDisplay: 'Ask', manualModeElement: manualModeRef.current,
+                setErrorMessage: setErrorMsg, setManualModeState,
+                setResult: setAnswer,
+                onFinish: () => setAskInProgress(false),
+              })
+          }}
         >Ask
         </button>
       </div>

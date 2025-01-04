@@ -22,41 +22,50 @@ export function getAllImplementations(
 export interface ManualModeState {
   actionDisplay: string
   prompt: string
+  originalPosition: number | null
   onResult: (result: string) => void
+  onFinish: () => void
 }
 
-const MANUAL_PREFIX = 'manual:'
-const RESPONSE_PREFIX = 'res:'
-
 export function runAction(
-  app: string, action: any, ident: string, actionDisplay: string,
-  { setErrorMessage, setManualModeState, appendResult }:
   {
-    setErrorMessage: (error: string) => void
-    setManualModeState: (newState: ManualModeState) => void
-    appendResult: (result: string) => void
-  }
-): void {
+    app, action, ident, actionDisplay, manualModeElement,
+    setErrorMessage, setManualModeState, setResult, onFinish,
+  }: {
+    app: string; action: any; ident: string; actionDisplay: string;
+    manualModeElement: HTMLDivElement | null;
+    setErrorMessage: (error: string) => void;
+    setManualModeState: (newState: ManualModeState) => void;
+    setResult: (result: string) => void;
+    onFinish: () => void;
+  }): void {
   const response = new Channel<string>()
-  let first = true
-  response.onmessage = msg => {
-    if (first) {
-      if (msg.startsWith(MANUAL_PREFIX)) {
-        setManualModeState({
-          actionDisplay,
-          onResult: appendResult,
-          prompt: msg.substring(MANUAL_PREFIX.length),
-        })
-      } else if (msg.startsWith(RESPONSE_PREFIX)) {
-        first = false
-        appendResult(msg.substring(RESPONSE_PREFIX.length))
-      }
-    } else {
-      appendResult(msg)
-    }
+  let result = ''
+  response.onmessage = (msg) => {
+    result += msg
+    setResult(result)
   }
 
   invoke(app + '_run_action', { action, ident, response })
+    .then((manual: any) => {
+      if (manual?.prompt) {
+        let originalPosition: number | null = null
+        if (manualModeElement !== null) {
+          originalPosition = window.scrollY
+          manualModeElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+
+        setManualModeState({
+          actionDisplay,
+          onResult: setResult,
+          prompt: manual.prompt,
+          originalPosition,
+          onFinish,
+        })
+      } else {
+        onFinish()
+      }
+    })
     .catch(err => {
       error(`Failed to run prompt ${ident} in ${app}: ${err}`)
       setErrorMessage(`Failed to run prompt ${ident}`)

@@ -1,5 +1,5 @@
-import { invoke, Channel } from "@tauri-apps/api/core";
-import { error } from '@tauri-apps/plugin-log';
+import { invoke, Channel } from '@tauri-apps/api/core'
+import { error } from '@tauri-apps/plugin-log'
 
 export interface Implementation {
   ident: string

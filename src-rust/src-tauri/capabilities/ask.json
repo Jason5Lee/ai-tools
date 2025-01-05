@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "ask",
+  "description": "Capability for the config window",
+  "windows": ["config"],
+  "permissions": [
+    "log:default"
+  ]
+}

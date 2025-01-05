@@ -1,4 +1,4 @@
-import { Implementation } from "./index.ts";
+import { Implementation } from './index.ts'
 
 function ImplSelect(
   { label, display, all, selectedIdent, setSelectedIdent }:
@@ -8,7 +8,7 @@ function ImplSelect(
     all: Implementation[] | undefined
     selectedIdent: string | undefined
     setSelectedIdent: (selectedIdent: string) => void
-  }
+  },
 ) {
   if (selectedIdent === undefined && all !== undefined) {
     for (let i = 0; i < all.length; ++i) {

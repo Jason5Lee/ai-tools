@@ -1,5 +1,5 @@
-use eventsource_stream::Eventsource;
 use crate::{log_error, AppState, RunActionOutput, RunActionResult};
+use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
 use tracing::{error, info, instrument};
 
@@ -39,15 +39,19 @@ pub async fn chat_completion(state: &AppState, payload: &serde_json::Value) -> R
         .bytes_stream()
         .eventsource()
         .map(|event| {
-            let event = event
-                .map_err(|err| info!("Failed to read chat completion response: {err}"))?;
+            let event =
+                event.map_err(|err| info!("Failed to read chat completion response: {err}"))?;
             if event.event != "message" || event.data == "[DONE]" {
-                return Ok(String::new())
+                return Ok(String::new());
             }
 
             let chunk = serde_json::from_str::<ChatChunk>(&event.data)
                 .map_err(|err| error!("Failed to deserialize OpenAI response from event: {err}"))?;
-            Ok(chunk.choices.into_iter().next().and_then(|c| c.delta.content)
+            Ok(chunk
+                .choices
+                .into_iter()
+                .next()
+                .and_then(|c| c.delta.content)
                 .unwrap_or(String::new()))
         });
 

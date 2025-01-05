@@ -1,6 +1,6 @@
-import { ManualModeState } from "./index.ts";
-import { useCallback, useState } from "react";
-import { error } from "@tauri-apps/plugin-log";
+import { ManualModeState } from './index.ts'
+import { useCallback, useState } from 'react'
+import { error } from '@tauri-apps/plugin-log'
 
 function ManualMode(
   { state, setState, setErrorMessage }:
@@ -8,7 +8,7 @@ function ManualMode(
     state: ManualModeState | null
     setState: (oldState: ManualModeState | null) => void
     setErrorMessage: (errorMessage: string) => void
-  }
+  },
 ) {
   if (!state) {
     return <></>
@@ -30,9 +30,9 @@ function ManualMode(
         state.onResult(r)
         state.onFinish()
         if (state.originalPosition !== null) {
-          const top = state.originalPosition;
+          const top = state.originalPosition
           setTimeout(() =>
-            window.scrollTo({ top }), 20);
+            window.scrollTo({ top }), 20)
         }
         setState(null)
         setCopied(false)
@@ -46,9 +46,9 @@ function ManualMode(
   const cancel = useCallback(() => {
     state.onFinish()
     if (state.originalPosition !== null) {
-      const top = state.originalPosition;
+      const top = state.originalPosition
       setTimeout(() =>
-        window.scrollTo({ top }), 20);
+        window.scrollTo({ top }), 20)
     }
     setState(null)
     setCopied(false)

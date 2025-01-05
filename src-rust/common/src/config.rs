@@ -1,6 +1,6 @@
 use crate::{log_error, AppState};
-use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
+use std::path::PathBuf;
+use std::sync::Arc;
 use tracing::instrument;
 
 #[derive(Default, serde::Serialize, serde::Deserialize)]
@@ -9,7 +9,7 @@ pub struct Config {
     pub openai_api_key: Option<String>,
 }
 
-#[instrument(level = "info")]
+#[instrument]
 pub fn load_config_from_dir(mut dir: PathBuf) -> Result<Config, ()> {
     dir.push("config.json");
     let config_path = dir;
@@ -20,13 +20,14 @@ pub fn load_config_from_dir(mut dir: PathBuf) -> Result<Config, ()> {
             if err.kind() == std::io::ErrorKind::NotFound {
                 Ok(Config::default())
             } else {
-                Err(log_error(err))
+                log_error(err);
+                Err(())
             }
         }
     }
 }
 
-#[instrument(level = "info", skip(state, config))]
+#[instrument(skip(state, config))]
 pub fn save_config_to_dir(
     state: &AppState,
     mut dir: PathBuf,

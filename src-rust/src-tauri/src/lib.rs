@@ -2,13 +2,12 @@ use ai_tools_common::futures_util::stream::StreamExt;
 mod ask;
 mod config;
 
-use std::path::PathBuf;
-use tauri::Manager;
-use tauri_plugin_log::{Target, TargetKind};
-use tracing_subscriber::layer::SubscriberExt;
 use ai_tools_common::tracing::error;
 pub use ai_tools_common::AppState;
 use ai_tools_common::{log_error, Manual, RunActionOutput, RunActionResult};
+use std::path::PathBuf;
+use tauri::Manager;
+use tauri_plugin_log::{Target, TargetKind};
 
 async fn translate_run_action_result(
     original_result: RunActionResult,
@@ -25,9 +24,7 @@ async fn translate_run_action_result(
 
             Ok(None)
         }
-        RunActionOutput::Manual(manual ) => {
-            Ok(Some(manual))
-        }
+        RunActionOutput::Manual(manual) => Ok(Some(manual)),
     }
 }
 
@@ -56,7 +53,6 @@ fn set_window_title(window: tauri::WebviewWindow, title: String) -> Result<(), (
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_shell::init())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .targets([
@@ -66,17 +62,6 @@ pub fn run() {
                 .build(),
         )
         .setup(|app| {
-            let filter = tracing_subscriber::EnvFilter::from_default_env();
-            let layer = tracing_tree::HierarchicalLayer::default()
-                .with_indent_lines(true)
-                .with_ansi(true)
-                .with_targets(true)
-                .with_indent_amount(2);
-            let subscriber = tracing_subscriber::Registry::default()
-                .with(filter)
-                .with(layer);
-            ai_tools_common::tracing::subscriber::set_global_default(subscriber).unwrap();
-
             let conf = config::load_config(app.handle())
                 .map_err(|()| Box::<dyn std::error::Error>::from("Failed to read config"))?;
 

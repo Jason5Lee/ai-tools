@@ -31,10 +31,13 @@ export default defineConfig(async () => ({
     },
   },
   build: {
+    outDir: '../dist',
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         main: "src/index.html",
-        answer: "src/ask/index.html",
+        config: "src/config/index.html",
+        ask: "src/ask/index.html",
       },
     }
   }

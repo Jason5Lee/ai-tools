@@ -182,7 +182,9 @@ pub enum RunAction {
 pub async fn run_action(state: &AppState, action: RunAction, ident: String) -> RunActionResult {
     match action {
         RunAction::Rewrite { question } => match ident.as_str() {
-            GENERAL_MANUAL => prompt_into_manual_result(format!("{REWRITE_PROMPT_DEFAULT}{question}")),
+            GENERAL_MANUAL => {
+                prompt_into_manual_result(format!("{REWRITE_PROMPT_DEFAULT}{question}"))
+            }
             openai_api_method => {
                 let openai_model = match openai_api_method {
                     OPENAI_4O_MINI => Ok("gpt-4o-mini"),
@@ -231,7 +233,9 @@ pub async fn run_action(state: &AppState, action: RunAction, ident: String) -> R
             }
         },
         RunAction::GenSearch { question } => match ident.as_str() {
-            GENERAL_MANUAL => prompt_into_manual_result(format!("{GEN_SEARCH_PROMPT_DEFAULT}{question}")),
+            GENERAL_MANUAL => {
+                prompt_into_manual_result(format!("{GEN_SEARCH_PROMPT_DEFAULT}{question}"))
+            }
             openai_api_method => {
                 let openai_model = match openai_api_method {
                     OPENAI_4O => Ok("gpt-4o"),
@@ -284,7 +288,7 @@ pub async fn run_action(state: &AppState, action: RunAction, ident: String) -> R
             let prompt = match material {
                 Some(material) =>
                     format!("{MATERIAL_BASED_PROMPT_HEADER}\n\n{material}\n\n{MATERIAL_BASED_PROMPT_SEP}\n\n{question}\n\n{MATERIAL_BASED_PROMPT_END}"),
-                None => format!("{question}"),
+                None => question,
             };
 
             match ident.as_str() {

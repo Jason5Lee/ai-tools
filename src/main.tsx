@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import ReactDOM from "react-dom/client";
-import { invoke } from "@tauri-apps/api/core";
-import ErrorMsg from "./common/ErrorMsg.tsx";
+import React, { useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import { invoke } from '@tauri-apps/api/core'
+import ErrorMsg from './common/ErrorMsg.tsx'
 
 function App() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   return (
     <div>
-      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg}/>
+      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg} />
       <div className="flex">
         <button onClick={() => {
-          invoke("open_app", { name: 'config' })
+          invoke('open_app', { name: 'config' })
             .catch(() => {
               setErrorMsg('')
             })
@@ -22,7 +22,7 @@ function App() {
       <div className="flex items-center justify-center h-screen">
         <button
           onClick={() => {
-            invoke("open_app", { name: 'ask' })
+            invoke('open_app', { name: 'ask' })
           }}
           className="default-button"
         >
@@ -30,11 +30,11 @@ function App() {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App/>
+    <App />
   </React.StrictMode>,
-);
+)

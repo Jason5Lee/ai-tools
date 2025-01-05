@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom/client";
-import { invoke } from "@tauri-apps/api/core";
-import ImplSelect from "../common/ImplSelect.tsx";
-import { Implementation, ManualModeState, getAllImplementations, runAction } from "../common";
-import ErrorMsg from "../common/ErrorMsg.tsx";
-import ManualMode from "../common/ManualMode"
+import React, { useEffect, useRef, useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import { invoke } from '@tauri-apps/api/core'
+import ImplSelect from '../common/ImplSelect.tsx'
+import { Implementation, ManualModeState, getAllImplementations, runAction } from '../common'
+import ErrorMsg from '../common/ErrorMsg.tsx'
+import ManualMode from '../common/ManualMode'
 
 const rewriteImplDisplay: Record<string, string> = {
   GENERAL_MANUAL: 'Manual - General',
@@ -33,15 +33,15 @@ const app = 'ask'
 
 function App() {
   useEffect(() => {
-    invoke("set_window_title", { title: "AI Tools - Ask" })
+    invoke('set_window_title', { title: 'AI Tools - Ask' })
   }, [])
 
-  const manualModeRef = useRef<HTMLDivElement>(null);
+  const manualModeRef = useRef<HTMLDivElement>(null)
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [searchSectionOpen, setSearchSectionOpen] = useState(true)
   const [search, setSearch] = useState('')
-  const [materialText, setMaterialText] = useState('');
+  const [materialText, setMaterialText] = useState('')
   const [question, setQuestion] = useState('')
   const [rewrittenQuestion, setRewrittenQuestion] = useState('')
 
@@ -76,26 +76,26 @@ function App() {
     getAllImplementations(app, 'rewrite', setAllRewriteImpls, setErrorMsg)
     getAllImplementations(app, 'genSearch', setAllGenSearchImpls, setErrorMsg)
     getAllImplementations(app, 'ask', setAllAskImpls, setErrorMsg)
-  }, []);
+  }, [])
 
   return (
     <div className="p-4 max-w-screen-lg mx-auto">
-      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg}/>
+      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg} />
       {/* Select Implementation */}
       <div className="flex items-center mb-4">
         <ImplSelect label="Rewrite" display={rewriteImplDisplay} all={allRewriteImpls}
-                    selectedIdent={selectedRewriteImplIdent} setSelectedIdent={setSelectedRewriteImplIdent}/>
+                    selectedIdent={selectedRewriteImplIdent} setSelectedIdent={setSelectedRewriteImplIdent} />
         <ImplSelect label="Generate Search" display={genSearchImplDisplay} all={allGenSearchImpls}
-                    selectedIdent={selectedGenSearchImplIdent} setSelectedIdent={setSelectedGenSearchImplIdent}/>
+                    selectedIdent={selectedGenSearchImplIdent} setSelectedIdent={setSelectedGenSearchImplIdent} />
       </div>
       <div className="flex items-center mb-4">
         <ImplSelect label="Answer" display={askImplDisplay} all={allAskImpls}
-                    selectedIdent={selectedAskImplIdent} setSelectedIdent={setSelectedAskImplIdent}/>
+                    selectedIdent={selectedAskImplIdent} setSelectedIdent={setSelectedAskImplIdent} />
       </div>
 
       {/* Manual Mode */}
       <div ref={manualModeRef}></div>
-      <ManualMode state={manualModeState} setState={setManualModeState} setErrorMessage={setErrorMsg}/>
+      <ManualMode state={manualModeState} setState={setManualModeState} setErrorMessage={setErrorMsg} />
       {/* Question Input */}
       <div className="flex items-center mb-4">
         <textarea
@@ -107,7 +107,7 @@ function App() {
         />
         <button
           disabled={rewriteDisabled}
-          className={rewriteDisabled ? "ml-2 default-disabled-button" : "ml-2 default-button"}
+          className={rewriteDisabled ? 'ml-2 default-disabled-button' : 'ml-2 default-button'}
           onClick={() => {
             setRewriteInProgress(true)
             runAction(
@@ -117,7 +117,7 @@ function App() {
                 actionDisplay: 'Rewrite', manualModeElement: manualModeRef.current,
                 setErrorMessage: setErrorMsg, setManualModeState,
                 setResult: setRewrittenQuestion,
-                onFinish: () => setRewriteInProgress(false)
+                onFinish: () => setRewriteInProgress(false),
               })
           }}
         >Rewrite
@@ -138,7 +138,7 @@ function App() {
       <div className="mb-4">
         <label
           onClick={() => {
-            setSearchSectionOpen(prev => !prev);
+            setSearchSectionOpen(prev => !prev)
           }}
           className="cursor-pointer text-lg font-semibold mb-2 default-label"
         >
@@ -148,7 +148,7 @@ function App() {
           <>
             <button
               disabled={genSearchDisabled}
-              className={genSearchDisabled ? "default-disabled-button mb-4" : "default-button mb-4"}
+              className={genSearchDisabled ? 'default-disabled-button mb-4' : 'default-button mb-4'}
               onClick={() => {
                 setGenSearchInProgress(true)
                 runAction(
@@ -184,7 +184,7 @@ function App() {
       <div className="mb-4">
         <button
           disabled={askDisabled}
-          className={askDisabled ? "default-disabled-green-button" : "default-green-button"}
+          className={askDisabled ? 'default-disabled-green-button' : 'default-green-button'}
           onClick={() => {
             setAskInProgress(true)
             runAction(
@@ -193,7 +193,7 @@ function App() {
                 action: {
                   name: 'ask',
                   question: getQuestion(),
-                  material: materialText === '' ? undefined : materialText
+                  material: materialText === '' ? undefined : materialText,
                 },
                 actionDisplay: 'Ask', manualModeElement: manualModeRef.current,
                 setErrorMessage: setErrorMsg, setManualModeState,
@@ -211,13 +211,13 @@ function App() {
           {answer}
         </p>
       </div>
-      <button className='default-button' onClick={() => navigator.clipboard.writeText(answer)}>Copy</button>
+      <button className="default-button" onClick={() => navigator.clipboard.writeText(answer)}>Copy</button>
     </div>
-  );
+  )
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App/>
+    <App />
   </React.StrictMode>,
-);
+)

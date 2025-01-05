@@ -20,7 +20,7 @@ pub struct Manual {
 
 pub enum RunActionOutput {
     Response(BoxStream<'static, Result<String, ()>>),
-    Manual(Manual)
+    Manual(Manual),
 }
 pub type RunActionResult = Result<RunActionOutput, ()>;
 

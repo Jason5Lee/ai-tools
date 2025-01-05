@@ -1,6 +1,6 @@
-use ai_tools_common::{tracing, Manual};
 use ai_tools_common::tracing::instrument;
 use ai_tools_common::{ask, AppState, Implementation};
+use ai_tools_common::{tracing, Manual};
 use tauri::{AppHandle, Manager};
 
 #[tauri::command]

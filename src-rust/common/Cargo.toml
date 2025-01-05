@@ -1,6 +1,6 @@
 [package]
 name = "ai-tools-common"
-version = "0.1.0"
+version = "0.0.1-alpha.1"
 edition = "2021"
 
 [dependencies]
@@ -9,7 +9,9 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.12", features = ["rustls-tls", "json", "stream"] }
 tracing = { version = "0.1", features = ["log"] }
-tokio = { version = "1.40" }
 futures-util = "0.3"
 chrono = "0.4"
 eventsource-stream = "0.2"
+
+[lints.clippy]
+result_unit_err = "allow" # Unit represent error that has been logged. This may not be a good practice, but is used right now.

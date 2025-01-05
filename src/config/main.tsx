@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import ReactDOM from "react-dom/client";
-import { invoke } from "@tauri-apps/api/core";
-import ErrorMsg from "../common/ErrorMsg.tsx";
+import React, { useEffect, useState } from 'react'
+import ReactDOM from 'react-dom/client'
+import { invoke } from '@tauri-apps/api/core'
+import ErrorMsg from '../common/ErrorMsg.tsx'
+import { error } from '@tauri-apps/plugin-log'
 
 function App() {
   useEffect(() => {
-    invoke("set_window_title", { title: "AI Tools Configuration" })
+    invoke('set_window_title', { title: 'AI Tools Configuration' })
     invoke('get_config')
       .then(setFromConfig)
-  }, []);
+  }, [])
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [openaiEnabled, setOpenaiEnabled] = useState(false);
+  const [openaiEnabled, setOpenaiEnabled] = useState(false)
   const [openaiApiKey, setOpenaiApiKey] = useState('')
 
-  const setFromConfig = (conf: any)  => {
-    console.log(JSON.stringify(conf))
+  const setFromConfig = (conf: any) => {
     if (conf.openaiApiKey) {
       setOpenaiEnabled(true)
       setOpenaiApiKey(conf.openaiApiKey)
@@ -24,7 +24,7 @@ function App() {
 
   return (
     <div className="p-4 max-w-screen-lg mx-auto">
-      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg}/>
+      <ErrorMsg msg={errorMsg} setMsg={setErrorMsg} />
 
       <div className="space-y-2 mb-6">
         <label className="inline-flex items-center space-x-2">
@@ -39,11 +39,11 @@ function App() {
         <div className="flex items-center space-x-1">
           <label className="default-label">OpenAI API Key:</label>
           <input
-            type="text"
+            type="password"
             value={openaiApiKey}
             onChange={e => setOpenaiApiKey(e.target.value)}
             disabled={!openaiEnabled}
-            className={openaiEnabled ? "configure-input" : "disabled-configure-input"}
+            className={openaiEnabled ? 'configure-input' : 'disabled-configure-input'}
           />
         </div>
       </div>
@@ -58,12 +58,12 @@ function App() {
               {
                 config: {
                   openaiApiKey: openaiEnabled ? openaiApiKey : undefined,
-                }
-              }
+                },
+              },
             )
               .then(setFromConfig)
               .catch(e => {
-                console.log(e)
+                error('Failed to save config ' + e)
                 setErrorMsg('Failed to save config')
               })
           }}
@@ -72,11 +72,11 @@ function App() {
         </button>
       </div>
     </div>
-  );
+  )
 }
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App/>
+    <App />
   </React.StrictMode>,
-);
+)
